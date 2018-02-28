@@ -1,18 +1,21 @@
 #!/bin/bash
+# Custom mule start up scrip that will register run time to anypoint platform
 
 #hardcode environment variable for testing
-orgName="ExxonMobil"
+businessGroupName="ExxonMobil"
 username="tanetgFeb2018"
 password="tanetgFeb2018"
-envName="Development"
-platformurl="anypoint.mulesoft.com"
-httpPort=443
-clusterName="HelloDocker"
+environmentName="Production"
+anypointPlatformHost="anypoint.mulesoft.com"
+anypointPlatformPort=443
+registerTargetName="HelloDocker"
+registerTargetType="cluster"
 client_id="b957b304bcb04da59d4d565c0b4d433b"
 client_secret="c5Fa13E33E4C4eDd847CB1eE184180E2"
 key="testbyseng"
-env="dev"
-standalone="false"
+env="prd"
+
+# end hardcode
 
 echo "username - $username"
 echo "orgName - $orgName"
@@ -25,6 +28,14 @@ echo "key - $key"
 echo "env - $env"
 echo "standalone - $standalone"
 
+# Parameter check and set default value
+# check platform parameter if missing change to standalone mode (no server registration/add to group/cluster)
+if [ "$orgName" == "" ||  "$username" == "" ||  "$password" == "" ||  "$username" == "" ||  ]
+    then
+      echo "$addtoClusterResponse"
+    else  
+      echo "$addtoClusterResponse"
+fi
  
 hybridAPI=https://$platformurl:$httpPort/hybrid/api/v1
 accAPI=https://$platformurl:$httpPort/accounts
