@@ -45,7 +45,7 @@ RUN     chmod 777 /app/mule/conf/wrapper.conf
 ## Define mount points.
 VOLUME ["/app/mule/logs", "/app/mule/conf", "/app/mule/apps", "/app/mule/domains"]
 
-##Mule app port
+## Mule app port
 EXPOSE 443
 EXPOSE 8081
 EXPOSE 8082

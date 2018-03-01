@@ -122,7 +122,8 @@ addMuleToServerGroup()
   return 0
 }
 
-# check platform parameter if missing change to standalone mode (no server registration/add to group/cluster)
+# Main start here
+# Check platform parameter if missing change to standalone mode (no server registration/add to group/cluster)
 if [[ "$orgName" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName" != "" ]]
     then
         echo "Register server to anypoint platform.. and start server"
@@ -178,8 +179,6 @@ if [[ "$orgName" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName
                   echo "Only register server.."
               fi
         fi
-
-
     else
         echo "Not complete platform variable.. start server in standalone mode"  
 fi
@@ -187,7 +186,7 @@ fi
 echo "Starting Mule"
  
 # Start mule!
-./mule -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env
+./mule -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$e nv
 
 
 
