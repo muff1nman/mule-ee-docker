@@ -15,6 +15,8 @@ client_id="b957b304bcb04da59d4d565c0b4d433b"
 client_secret="c5Fa13E33E4C4eDd847CB1eE184180E2"
 key="testbyseng"
 env="prd"
+initMemory=512
+maxMemory=512
 
 # end hardcode
 
@@ -30,6 +32,8 @@ echo "client_id - $client_id"
 echo "client_secret - $client_secret"
 echo "key - $key"
 echo "env - $env"
+echo "initMemory - $initMemory"
+echo "maxMemory - $maxMemory"
 
 #Function to wait server to start up
 waitingServerStart()
@@ -183,10 +187,19 @@ if [[ "$orgName" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName
         echo "Not complete platform variable.. start server in standalone mode"  
 fi
 
+# Check memory setting
+if [ "$initMemory" == "" ]
+    then
+        initMemory=1024
+fi
+if [ "$maxMemory" == "" ]
+    then
+        maxMemory=1024
+fi
 echo "Starting Mule"
  
 # Start mule!
-./mule -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$e nv
+./mule -M-Dwrapper.java.initmemory=$initMemory -M-Dwrapper.java.maxmemory=$maxMemory -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env
 
 
 
