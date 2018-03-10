@@ -1,47 +1,62 @@
 #!/bin/bash
 # Custom mule start up scrip that will register run time to anypoint platform
 
-#hardcode environment variable for testing
-
-orgName="ExxonMobil"
-username="tanetgFeb2018"
-password="tanetgFeb2018"
-envName="Production"
-#anypointPlatformHost="anypoint.mulesoft.com"
-#anypointPlatformPort=443
-registerTargetGroupName="HelloServerGroup"
-registerTargetGroupType="serverGroup"
-client_id="b957b304bcb04da59d4d565c0b4d433b"
-client_secret="c5Fa13E33E4C4eDd847CB1eE184180E2"
-key="testbyseng"
-env="prd"
-initMemory=512
-maxMemory=512
-proxyHost=159.203.177.113
-proxyPort=8080
-proxyUsername=
-proxyPassword=
-
-# end hardcode
+### Mule Startup Script argument  Required  Description ###
+## Platform relate argument		              if any require argument below not exist, runtime will not register to runtime ##
+# orgId                           yes	      orgId that runtime will register to
+# username	                      yes	      Platform username
+# password	                      yes	      Platform password
+# envName	                        yes	      Environment Name that runtime will register to
+# anypointPlatformHost	          no	      Default anypoint.mulesoft.com
+# anypointPlatformPort	          no	      Default 443
+# registerTargetGroupName	        no	      Group name that runtime will join. Default runtime will not join any group
+# registerTargetGroupType	        no	      Group type serverGroup or cluster. Default runtime will not join any group
+# proxyHost	                      no	      proxy for CURL command
+# proxyPort	                      no        proxy for CURL command
+# proxyUsername	                  no	      proxy for CURL command
+# proxyPassword	                  no	      proxy for CURL command
+## Mule runtime relate argument ##		
+# client_id	                      no	      value for -M-Danypoint.platform.client_id
+# client_secret	                  no	      value for -M-Danypoint.platform.client_secret
+# key                           	no	      value for -M-Dkey
+# env	                            no	      value for -M-Denv=$env
+# initMemory	                    no	      value for -M-Dwrapper.java.initmemory. Default 512
+# maxMemory	                      no	      value for -M-Dwrapper.java.maxmemory. Default 512
+# startMuleOtherArguments	        no	      Other key value argument that will pass to runtime
 
 echo "start script with variable.."
-echo "orgName - $orgName"
-echo "username - $username"
-echo "envName - $envName"
-echo "anypointPlatformHost - $anypointPlatformHost"
-echo "anypointPlatformPort - $anypointPlatformPort"
-echo "registerTargetGroupName - $registerTargetGroupName"
-echo "registerTargetGroupType - $registerTargetGroupType"
-echo "client_id - $client_id"
-echo "client_secret - $client_secret"
-echo "key - $key"
+echo "orgId: $orgId"
+echo "username: $username"
+if [ "$password" != "" ]
+    then
+        echo "password: *******"
+fi
+echo "envName: $envName"
+echo "anypointPlatformHost: $anypointPlatformHost"
+echo "anypointPlatformPort: $anypointPlatformPort"
+echo "registerTargetGroupName: $registerTargetGroupName"
+echo "registerTargetGroupType: $registerTargetGroupType"
+echo "client_id: $client_id"
+if [ "$client_secret" != "" ]
+    then
+        echo "client_secret: *******"
+fi
+if [ "$key" != "" ]
+    then
+        echo "key: *******"
+fi
 echo "env - $env"
-echo "initMemory - $initMemory"
-echo "maxMemory - $maxMemory"
-echo "proxyHost - $proxyHost"
-echo "proxyPort - $proxyPort"
-echo "proxyUsername - $proxyUsername"
-echo "maxMemory - $maxMemory"
+echo "initMemory: $initMemory"
+echo "maxMemory: $maxMemory"
+echo "proxyHost: $proxyHost"
+echo "proxyPort: $proxyPort"
+echo "proxyUsername: $proxyUsername"
+if [ "$proxyPassword" != "" ]
+    then
+        echo "proxyPassword: *******"
+fi
+echo "maxMemory: $maxMemory"
+echo "startMuleOtherArguments: $startMuleOtherArguments"
 
 #Function to wait server to start up
 waitingServerStart()
@@ -136,7 +151,7 @@ addMuleToServerGroup()
 
 # Main start here
 # Check platform parameter if missing change to standalone mode (no server registration/add to group/cluster)
-if [[ "$orgName" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName" != "" ]]
+if [[ "$orgId" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName" != "" ]]
     then
         echo "Register server to anypoint platform.. and start server"
         if [ "$anypointPlatformHost" == "" ]
@@ -169,11 +184,12 @@ if [[ "$orgName" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName
         accessToken=$(curl $proxyOption -s $accAPI/login -X POST -d "username=$username&password=$password" | /app/jq --raw-output .access_token)
         echo "Access Token: $accessToken"
     
+        ### comment out below session as orgId has been provide as parameter ###
         # Pull org id from my profile info
-        echo "Getting org ID from $accAPI/api/me..."
-        jqParam=".user.contributorOfOrganizations[] | select(.name==\"$orgName\").id"
-        orgId=$(curl $proxyOption -s $accAPI/api/me -H "Authorization:Bearer $accessToken" | /app/jq --raw-output "$jqParam")
-        echo "Organization ID: $orgId"
+        #echo "Getting org ID from $accAPI/api/me..."
+        #jqParam=".user.contributorOfOrganizations[] | select(.name==\"$orgName\").id"
+        #orgId=$(curl $proxyOption -s $accAPI/api/me -H "Authorization:Bearer $accessToken" | /app/jq --raw-output "$jqParam")
+        #echo "Organization ID: $orgId"
         
         # Pull env id from matching env name
         echo "Getting env ID from $accAPI/api/organizations/$orgId/environments..."
@@ -219,7 +235,7 @@ fi
 echo "Starting Mule"
  
 # Start mule!
-./mule -M-Dwrapper.java.initmemory=$initMemory -M-Dwrapper.java.maxmemory=$maxMemory -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env
+./mule -M-Dwrapper.java.initmemory=$initMemory -M-Dwrapper.java.maxmemory=$maxMemory -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env $startMuleOtherArguments
 
 
 
