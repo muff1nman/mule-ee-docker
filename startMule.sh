@@ -17,6 +17,10 @@ key="testbyseng"
 env="prd"
 initMemory=512
 maxMemory=512
+proxyHost=159.203.177.113
+proxyPort=8080
+proxyUsername=
+proxyPassword=
 
 # end hardcode
 
@@ -34,6 +38,10 @@ echo "key - $key"
 echo "env - $env"
 echo "initMemory - $initMemory"
 echo "maxMemory - $maxMemory"
+echo "proxyHost - $proxyHost"
+echo "proxyPort - $proxyPort"
+echo "proxyUsername - $proxyUsername"
+echo "maxMemory - $maxMemory"
 
 #Function to wait server to start up
 waitingServerStart()
@@ -44,7 +52,7 @@ waitingServerStart()
     sleep 15s
     # Get Server Status from AMC
     echo "Getting server status from $hybridAPI/servers..."
-    serverData=$(curl -s $hybridAPI/servers/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
+    serverData=$(curl $proxyOption -s $hybridAPI/servers/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
 
     jqParam=".data[] | select(.name==\"$serverName\").status"
     serverStatus=$(echo $serverData | /app/jq --raw-output "$jqParam")
@@ -58,14 +66,14 @@ addMuleToCluster()
   waitingServerStart
   echo "Adding server to cluster"
   echo "Getting server details from $hybridAPI/servers..."
-  serverData=$(curl -s $hybridAPI/servers/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
+  serverData=$(curl $proxyOption -s $hybridAPI/servers/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
   
   jqParam=".data[] | select(.name==\"$serverName\").id"
   serverId=$(echo $serverData | /app/jq --raw-output "$jqParam")
   echo "ServerId $serverName: $serverId"
 
   echo "Getting cluster details from $hybridAPI/clusters..."
-  clusterData=$(curl -s $hybridAPI/clusters/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
+  clusterData=$(curl $proxyOption -s $hybridAPI/clusters/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
 
   jqParam=".data[] | select(.name==\"$registerTargetGroupName\").id"
   clusterId=$(echo $clusterData | /app/jq --raw-output "$jqParam")
@@ -76,13 +84,13 @@ addMuleToCluster()
     then
       echo "$registerTargetGroupName is found in cluster ID: $clusterId"
       echo "POST $hybridAPI/clusters/$clusterId/servers {\"serverId\":$serverId}"
-      addtoClusterResponse=$(curl -s -X "POST" "$hybridAPI/clusters/$clusterId/servers/" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{\"serverId\":$serverId}")
+      addtoClusterResponse=$(curl $proxyOption -s -X "POST" "$hybridAPI/clusters/$clusterId/servers/" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{\"serverId\":$serverId}")
       echo "$addtoClusterResponse"
       
     else
       echo "$registerTargetGroupName is not found. Create multicase cluster with serverId:$serverId"
       echo "POST $hybridAPI/clusters { \"name\": \"$registerTargetGroupName\", \"multicastEnabled\": true, \"servers\": [{\"serverId\": $serverId}]}"
-      addtoClusterResponse=$(curl -s -X "POST" "$hybridAPI/clusters/" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{ \"name\": \"$clusterName\", \"multicastEnabled\": true, \"servers\": [{\"serverId\": $serverId}]}")
+      addtoClusterResponse=$(curl $proxyOption -s -X "POST" "$hybridAPI/clusters/" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{ \"name\": \"$clusterName\", \"multicastEnabled\": true, \"servers\": [{\"serverId\": $serverId}]}")
       echo "$addtoClusterResponse"
   fi
 
@@ -95,14 +103,14 @@ addMuleToServerGroup()
   waitingServerStart
   echo "Adding server to serverGroup"
   echo "Getting server details from $hybridAPI/servers..."
-  serverData=$(curl -s $hybridAPI/servers/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
+  serverData=$(curl $proxyOption -s $hybridAPI/servers/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
   
   jqParam=".data[] | select(.name==\"$serverName\").id"
   serverId=$(echo $serverData | /app/jq --raw-output "$jqParam")
   echo "ServerId $serverName: $serverId"
 
   echo "Getting servergroups details from $hybridAPI/serverGroups..."
-  serverGroupData=$(curl -s $hybridAPI/serverGroups/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
+  serverGroupData=$(curl $proxyOption -s $hybridAPI/serverGroups/ -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
 
   jqParam=".data[] | select(.name==\"$registerTargetGroupName\").id"
   serverGroupId=$(echo $serverGroupData | /app/jq --raw-output "$jqParam")
@@ -113,13 +121,13 @@ addMuleToServerGroup()
     then
       echo "$registerTargetGroupName is found in serverGroup ID: $serverGroupId"
       echo "POST $hybridAPI/serverGroups/$serverGroupId/servers/$serverId"
-      addtoServerGroupResponse=$(curl -s -X "POST" "$hybridAPI/serverGroups/$serverGroupId/servers/$serverId" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
+      addtoServerGroupResponse=$(curl $proxyOption -s -X "POST" "$hybridAPI/serverGroups/$serverGroupId/servers/$serverId" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken")
       echo "$addtoServerGroupResponse"
       
     else
       echo "$registerTargetGroupName is not found. Create serverGroup with serverId:$serverId"
       echo "POST $hybridAPI/serverGroups { \"name\": \"$registerTargetGroupName\", \"serverIds\": [$serverId]}"
-      addtoServerGroupResponse=$(curl -s -X "POST" "$hybridAPI/serverGroups" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{ \"name\": \"$registerTargetGroupName\", \"serverIds\": [$serverId]}")
+      addtoServerGroupResponse=$(curl $proxyOption -s -X "POST" "$hybridAPI/serverGroups" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{ \"name\": \"$registerTargetGroupName\", \"serverIds\": [$serverId]}")
       echo "$addtoServerGroupResponse"
   fi
 
@@ -143,27 +151,39 @@ if [[ "$orgName" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName
         echo "Server name is $serverName"
         hybridAPI=https://$anypointPlatformHost:$anypointPlatformPort/hybrid/api/v1
         accAPI=https://$anypointPlatformHost:$anypointPlatformPort/accounts
+
+        # Check if proxy will be use
+        if [[ "$proxyHost" != "" &&  "$proxyPort" != "" ]]
+          then
+            if [[ "$proxyUsername" != "" &&  "$proxyPassword" != "" ]]
+              then
+                proxyOption="-x http://$proxyHost:$proxyPort --proxy-user $proxyUsername:$proxyPassword"
+              else
+                proxyOption="-x http://$proxyHost:$proxyPort"
+            fi
+        fi
+        echo "Proxy option is $proxyOption"
         
         # Authenticate with user credentials (Note the APIs will NOT authorize for tokens received from the OAuth call. A user credentials is essential)
         echo "Getting access token from $accAPI/login..."
-        accessToken=$(curl -s $accAPI/login -X POST -d "username=$username&password=$password" | /app/jq --raw-output .access_token)
+        accessToken=$(curl $proxyOption -s $accAPI/login -X POST -d "username=$username&password=$password" | /app/jq --raw-output .access_token)
         echo "Access Token: $accessToken"
     
         # Pull org id from my profile info
         echo "Getting org ID from $accAPI/api/me..."
         jqParam=".user.contributorOfOrganizations[] | select(.name==\"$orgName\").id"
-        orgId=$(curl -s $accAPI/api/me -H "Authorization:Bearer $accessToken" | /app/jq --raw-output "$jqParam")
+        orgId=$(curl $proxyOption -s $accAPI/api/me -H "Authorization:Bearer $accessToken" | /app/jq --raw-output "$jqParam")
         echo "Organization ID: $orgId"
         
         # Pull env id from matching env name
         echo "Getting env ID from $accAPI/api/organizations/$orgId/environments..."
         jqParam=".data[] | select(.name==\"$envName\").id"
-        envId=$(curl -s $accAPI/api/organizations/$orgId/environments -H "Authorization:Bearer $accessToken" | /app/jq --raw-output "$jqParam")
+        envId=$(curl $proxyOption -s $accAPI/api/organizations/$orgId/environments -H "Authorization:Bearer $accessToken" | /app/jq --raw-output "$jqParam")
         echo "Environment ID: $envId"
         
         # Request amc token
         echo "Getting registrion token from $hybridAPI/servers/registrationToken..."
-        amcToken=$(curl -s $hybridAPI/servers/registrationToken -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" | /app/jq --raw-output .data)
+        amcToken=$(curl $proxyOption -s $hybridAPI/servers/registrationToken -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" | /app/jq --raw-output .data)
         echo "AMC Token: $amcToken"
         
         # Register new mule
