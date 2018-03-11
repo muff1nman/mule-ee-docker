@@ -11,10 +11,10 @@
 # anypointPlatformPort	          no	      Default 443
 # registerTargetGroupName	        no	      Group name that runtime will join. Default runtime will not join any group
 # registerTargetGroupType	        no	      Group type serverGroup or cluster. Default runtime will not join any group
-# proxyHost	                      no	      proxy for CURL command
-# proxyPort	                      no        proxy for CURL command
-# proxyUsername	                  no	      proxy for CURL command
-# proxyPassword	                  no	      proxy for CURL command
+# proxyHost	                      no	      HTTP Proxy Host
+# proxyPort	                      no          HTTP Proxy Port
+# proxyUsername	                  no	      HTTP Proxy Username
+# proxyPassword	                  no	      HTTP Proxy Password
 ## Mule runtime relate argument ##		
 # client_id	                      no	      value for -M-Danypoint.platform.client_id
 # client_secret	                  no	      value for -M-Danypoint.platform.client_secret
@@ -203,8 +203,18 @@ if [[ "$orgId" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName" 
         
         # Register new mule
         echo "Registering $serverName to Anypoint Platform..."
-        ./amc_setup -H $amcToken $serverName
-
+        # Check if proxy will be use
+        if [[ "$proxyHost" != "" &&  "$proxyPort" != "" ]]
+          then
+            if [[ "$proxyUsername" != "" &&  "$proxyPassword" != "" ]]
+              then
+                ./amc_setup -H $amcToken $serverName -P $proxyHost $proxyPort $proxyUsername $proxyPassword
+              else
+                ./amc_setup -H $amcToken $serverName -P $proxyHost $proxyPort
+            fi
+          else
+            ./amc_setup -H $amcToken $serverName
+        fi
         if [[ "$registerTargetGroupType" == "cluster" && "$registerTargetGroupName" != "" ]]
             then
                 echo "Add server to cluster $registerTargetGroupName"
@@ -234,6 +244,7 @@ fi
 echo "Starting Mule"
  
 # Start mule!
+# TODO - Pass proxy information
 ./mule -M-Dwrapper.java.initmemory=$initMemory -M-Dwrapper.java.maxmemory=$maxMemory -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env $startMuleOtherArguments
 
 

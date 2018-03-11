@@ -12,7 +12,7 @@ objects:
     metadata:
       name: mule-ee-${appName}
     spec:
-      replicas: 1
+      replicas: ${numPod}
       selector:
         app: mule-ee-${appName}
         deploymentconfig: mule-ee-${appName}
@@ -45,7 +45,7 @@ objects:
                 - name: password
                   valueFrom:
                     secretKeyRef:
-                      key: username
+                      key: password
                       name: anypointplatform
                 - name: client_id
                   value: ${client_id}
@@ -84,7 +84,11 @@ objects:
                   protocol: TCP
                 - containerPort: 54327
                   protocol: TCP
-              resources: {}
+              resources:
+                limits:
+                  memory: 1Gi
+                requests:
+                  memory: 512Mi
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
@@ -145,6 +149,21 @@ parameters:
   - name: appName
     displayName: Application Name
     description: "Application Name use to create various openshift resource. All lowercase required."
+    required: true
+  - name: numPod
+    displayName: Number of Pods
+    description: "Number of Pods deploy"
+    value: '1'
+    required: true
+  - name: requestMemory
+    displayName: Memory allocation to Pod
+    description: "Memory allocation to Pod e.g. 512Mi, 1Gi"
+    value: 512Mi
+    required: true
+  - name: limitMemory
+    displayName: Maximum memory allocation to Pod
+    description: "Maximum memory allocation to Pod e.g. 512Mi, 1Gi"
+    value: 1Gi
     required: true
   - name: orgId
     displayName: Organization ID
