@@ -1,0 +1,200 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: mule-ee-template
+  annotations:
+    description: "Template to provisioning mule-ee in OpenShift"
+    iconClass: "icon-openjdk"
+    tags: "mule-ee"
+objects:
+  - kind: DeploymentConfig
+    apiVersion: v1
+    metadata:
+      name: mule-ee-${appName}
+    spec:
+      replicas: 1
+      selector:
+        app: mule-ee-${appName}
+        deploymentconfig: mule-ee-${appName}
+      strategy:
+        activeDeadlineSeconds: 21600
+        resources: {}
+        rollingParams:
+          intervalSeconds: 1
+          maxSurge: 25%
+          maxUnavailable: 25%
+          timeoutSeconds: 600
+          updatePeriodSeconds: 1
+        type: Rolling
+      template:
+        metadata:
+          annotations:
+            openshift.io/generated-by: OpenShiftWebConsole
+          creationTimestamp: null
+          labels:
+            app: mule-ee-${appName}
+            deploymentconfig: mule-ee-${appName}
+        spec:
+          containers:
+            - env:
+                - name: username
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: anypointplatform
+                - name: password
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: anypointplatform
+                - name: client_id
+                  value: ${client_id}
+                - name: client_secret
+                  value: ${client_secret}
+                - name: env
+                  value: ${env}
+                - name: envName
+                  value: ${envName}
+                - name: initMemory
+                  value: ${initMemory}
+                - name: key
+                  value: ${key}
+                - name: maxMemory
+                  value: ${maxMemory}
+                - name: orgId
+                  value: ${orgId}
+                - name: registerTargetGroupName
+                  value: ${registerTargetGroupName}
+                - name: registerTargetGroupType
+                  value: ${registerTargetGroupType}
+              image: >-
+                tanetg/mule-ee@sha256:233365ce57ee7dc82f424f45a40b42df9f69cfe6236d3bc9610ee031227554ff
+              imagePullPolicy: Always
+              name: mule-ee-${appName}
+              ports:
+                - containerPort: 443
+                  protocol: TCP
+                - containerPort: 5701
+                  protocol: TCP
+                - containerPort: 8081
+                  protocol: TCP
+                - containerPort: 8082
+                  protocol: TCP
+                - containerPort: 8088
+                  protocol: TCP
+                - containerPort: 54327
+                  protocol: TCP
+              resources: {}
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+      test: false
+  - kind: Service
+    apiVersion: v1
+    metadata:
+      name: mule-ee-${appName}
+    spec:
+      ports:
+        - name: 443-tcp
+          port: 443
+          protocol: TCP
+          targetPort: 443
+        - name: 5701-tcp
+          port: 5701
+          protocol: TCP
+          targetPort: 5701
+        - name: 8081-tcp
+          port: 8081
+          protocol: TCP
+          targetPort: 8081
+        - name: 8082-tcp
+          port: 8082
+          protocol: TCP
+          targetPort: 8082
+        - name: 8088-tcp
+          port: 8088
+          protocol: TCP
+          targetPort: 8088
+        - name: 54327-tcp
+          port: 54327
+          protocol: TCP
+          targetPort: 54327
+      selector:
+        deploymentconfig: mule-ee-${appName}
+      sessionAffinity: None
+      type: ClusterIP           
+  - kind: Route
+    apiVersion: v1
+    metadata:
+      labels:
+        app: mule-ee-${appName}
+      name: ${appName}-route
+    spec:
+      port:
+        targetPort: 443-tcp
+      to:
+        kind: Service
+        name: mule-ee-${appName}
+        weight: 100
+      wildcardPolicy: None
+parameters:
+  - name: appName
+    displayName: Application Name
+    description: "Application Name use to create various openshift resource. All lowercase required."
+    required: true
+  - name: orgId
+    displayName: Organization ID
+    description: "Organization ID that runtime will register to"
+    value: 5adc463d-73d1-4e14-978f-1cf297d3fa84
+    required: true
+  - name: envName
+    displayName: Environment Name
+    description: "Environment Name that runtime will register to"
+    value: Development
+    required: true
+  - name: registerTargetGroupType
+    displayName: Register Target Group Type
+    description: "cluster or serverGroup"
+    value: cluster
+    required: true
+  - name: registerTargetGroupName
+    displayName: Register Target Group Name
+    description: "Group name that runtime will join"
+    required: true
+  - name: client_id
+    displayName: Client ID
+    description: "value for -M-Danypoint.platform.client_id"
+    value: b957b304bcb04da59d4d565c0b4d433b
+    required: false
+  - name: client_secret
+    displayName: Client Secret
+    description: "value for -M-Danypoint.platform.client_secret"
+    value: c5Fa13E33E4C4eDd847CB1eE184180E2
+    required: false
+  - name: key
+    displayName: Encryption Key
+    description: "value for -M-Dkey"
+    required: false
+  - name: env
+    displayName: Encryption Key
+    description: "value for -M-Denv"
+    value: dev
+    required: true
+  - name: initMemory
+    displayName: Init Memory
+    description: "value for -M-Dwrapper.java.initmemory. Default 512"
+    value: '512'
+    required: false
+  - name: maxMemory
+    displayName: Max Memory
+    description: "value for -M-Dwrapper.java.initmemory. Default 512"
+    value: '512'
+    required: false
+  - name: startMuleOtherArguments
+    displayName: Other Arguments
+    description: "Other key value argument that will pass to runtime e.g. -M-Dkey1=value1 -M-Dkey2=value2"
+    required: false

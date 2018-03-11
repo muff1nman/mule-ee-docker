@@ -6,7 +6,7 @@
 ###############################################################################
 
 FROM openjdk
-MAINTAINER email@mulesoft.com
+LABEL maintainer="tanetg@gmail.com"
 USER 0
  
 ###############################################################################
@@ -42,8 +42,8 @@ RUN     chmod 755 /app/mule/bin/startMule.sh
 ADD     ./wrapper.conf /app/mule/conf/
 RUN     chmod 777 /app/mule/conf/wrapper.conf
 
-## Define mount points.
-VOLUME ["/app/mule/logs", "/app/mule/conf", "/app/mule/apps", "/app/mule/domains"]
+## Define mount points. 
+## VOLUME ["/app/mule/logs", "/app/mule/conf", "/app/mule/apps", "/app/mule/domains"]
 
 ## Mule app port
 EXPOSE 443

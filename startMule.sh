@@ -55,7 +55,6 @@ if [ "$proxyPassword" != "" ]
     then
         echo "proxyPassword: *******"
 fi
-echo "maxMemory: $maxMemory"
 echo "startMuleOtherArguments: $startMuleOtherArguments"
 
 #Function to wait server to start up
@@ -105,7 +104,7 @@ addMuleToCluster()
     else
       echo "$registerTargetGroupName is not found. Create multicase cluster with serverId:$serverId"
       echo "POST $hybridAPI/clusters { \"name\": \"$registerTargetGroupName\", \"multicastEnabled\": true, \"servers\": [{\"serverId\": $serverId}]}"
-      addtoClusterResponse=$(curl $proxyOption -s -X "POST" "$hybridAPI/clusters/" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{ \"name\": \"$clusterName\", \"multicastEnabled\": true, \"servers\": [{\"serverId\": $serverId}]}")
+      addtoClusterResponse=$(curl $proxyOption -s -X "POST" "$hybridAPI/clusters/" -H "X-ANYPNT-ENV-ID:$envId" -H "X-ANYPNT-ORG-ID:$orgId" -H "Authorization:Bearer $accessToken" -H "Content-Type: application/json" -d "{ \"name\": \"$registerTargetGroupName\", \"multicastEnabled\": true, \"servers\": [{\"serverId\": $serverId}]}")
       echo "$addtoClusterResponse"
   fi
 
