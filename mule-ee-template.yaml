@@ -68,7 +68,7 @@ objects:
                 - name: registerTargetGroupType
                   value: ${registerTargetGroupType}
               image: >-
-                tanetg/mule-ee@sha256:233365ce57ee7dc82f424f45a40b42df9f69cfe6236d3bc9610ee031227554ff
+                tanetg/mule-ee:latest
               imagePullPolicy: Always
               name: mule-ee-${appName}
               ports:
