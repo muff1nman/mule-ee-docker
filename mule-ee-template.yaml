@@ -11,6 +11,8 @@ objects:
     apiVersion: v1
     metadata:
       name: mule-ee-${appName}
+      labels:
+        app: mule-ee-${appName}
     spec:
       replicas: ${numPod}
       selector:
