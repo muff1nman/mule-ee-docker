@@ -6,8 +6,7 @@
 ###############################################################################
 
 FROM openjdk
-LABEL maintainer="tanetg@gmail.com"
-USER 0
+LABEL maintainer="taneng_26@hotmail.com"
  
 ###############################################################################
 ## Setting up the arguments
@@ -20,45 +19,36 @@ ARG     muleHome=/app/mule-enterprise-standalone-$muleVersion
  
 ## Install Mule EE - these are the paths inside the Docker.
 WORKDIR  /app/
-COPY    mule-ee-distribution-standalone-3.9.0.tar.gz /app/
-RUN     tar -xvzf /app/mule-ee-distribution-standalone-3.9.0.tar.gz
-RUN     ls
-RUN     ln -s $muleHome/ mule
-RUN     ls -l mule
-RUN     rm -f $muleDistribution
- 
-## Copy the mule start/stop script
-RUN       chmod -R 777 /app/mule/logs
-RUN       chmod -R 777 /app/mule/bin
-RUN       chmod -R 777 /app/mule/conf
-RUN       mkdir /app/mule/.mule
-RUN       chmod -R 777 /app/mule/.mule
+COPY    $muleDistribution /app/
+RUN tar -xvzf /app/$muleDistribution && \
+        ln -s $muleHome/ mule && \
+        rm -f $muleDistribution
 
 ADD     ./jq /app/jq
-RUN     chmod +x /app/jq
-COPY    test.zip /app/mule/apps/
 ADD     ./startMule.sh /app/mule/bin/
-RUN     chmod 755 /app/mule/bin/startMule.sh
 ADD     ./wrapper.conf /app/mule/conf/
-RUN     chmod 777 /app/mule/conf/wrapper.conf
-
-## Define mount points. 
-## VOLUME ["/app/mule/logs", "/app/mule/conf", "/app/mule/apps", "/app/mule/domains"]
-
+   
 ## Mule app port
-EXPOSE 443
-EXPOSE 8081
-EXPOSE 8082
-EXPOSE 8088
-
-USER 1000
-
+EXPOSE  443
 
 ## Mule Cluster ports
-EXPOSE 5701
-EXPOSE 54327
- 
+EXPOSE  5701
+EXPOSE  54327
+
+RUN mkdir /app/mule/.mule && \
+        chmod -R 777 /app/mule/.mule && \
+        chmod 755 /app/jq && \
+	    chmod 755 /app/mule/bin/startMule.sh && \
+        chmod -R 777 /app/mule/bin && \
+	    chmod -R 777 /app/mule/conf && \
+        chmod -R 777 /app/mule/logs && \
+	    chmod -R g=u /var /opt && \
+	    chmod g=u /etc/passwd
+
+
 ## Environment and execution:
 ENV             MULE_BASE /app/mule
 WORKDIR         /app/mule/bin
 ENTRYPOINT      ["/app/mule/bin/startMule.sh"]
+CMD ./mule -M-Dwrapper.java.initmemory=$initMemory -M-Dwrapper.java.maxmemory=$maxMemory -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env $startMuleOtherArguments
+USER    1001

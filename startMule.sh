@@ -24,6 +24,18 @@
 # maxMemory	                      no	      value for -M-Dwrapper.java.maxmemory. Default 512
 # startMuleOtherArguments	        no	      Other key value argument that will pass to runtime
 
+set -e
+
+###################################################################################
+##################### CONFIGURE ARBITRARY OCP USER ################################
+###################################################################################
+if ! whoami &> /dev/null; then
+  if [ -w /etc/passwd ]; then
+    echo "${USER_NAME:-default}:x:$(id -u):0:${USER_NAME:-default} user:${HOME}:/sbin/nologin" >> /etc/passwd
+  fi
+fi
+
+
 echo "start script with variable.."
 echo "orgId: $orgId"
 echo "username: $username"
@@ -245,7 +257,9 @@ echo "Starting Mule"
  
 # Start mule!
 # TODO - Pass proxy information
-./mule -M-Dwrapper.java.initmemory=$initMemory -M-Dwrapper.java.maxmemory=$maxMemory -M-Danypoint.platform.client_id=$client_id -M-Danypoint.platform.client_secret=$client_secret -M-Dkey=$key -M-Denv=$env $startMuleOtherArguments
+###################################################################################
+##########################      RUN CMD    ########################################
+###################################################################################
 
-
+exec "$@"
 
