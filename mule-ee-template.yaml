@@ -92,25 +92,35 @@ objects:
               image: >-
                 tanetg/mule-ee:latest
               imagePullPolicy: Always
+              livenessProbe:
+                failureThreshold: 3
+                initialDelaySeconds: 300
+                periodSeconds: 10
+                successThreshold: 1
+                tcpSocket:
+                  port: 8081
+                timeoutSeconds: 1
               name: mule-ee-${appName}
               ports:
-                - containerPort: 443
-                  protocol: TCP
                 - containerPort: 5701
                   protocol: TCP
                 - containerPort: 8081
                   protocol: TCP
-                - containerPort: 8082
-                  protocol: TCP
-                - containerPort: 8088
-                  protocol: TCP
                 - containerPort: 54327
                   protocol: TCP
+              readinessProbe:
+                failureThreshold: 10
+                initialDelaySeconds: 75
+                periodSeconds: 10
+                successThreshold: 2
+                tcpSocket:
+                  port: 8081
+                timeoutSeconds: 1
               resources:
                 limits:
-                  memory: 1Gi
+                  memory: ${limitMemory}
                 requests:
-                  memory: 512Mi
+                  memory: ${requestMemory}
               terminationMessagePath: /dev/termination-log
               terminationMessagePolicy: File
           dnsPolicy: ClusterFirst
@@ -125,10 +135,6 @@ objects:
       name: mule-ee-${appName}
     spec:
       ports:
-        - name: 443-tcp
-          port: 443
-          protocol: TCP
-          targetPort: 443
         - name: 5701-tcp
           port: 5701
           protocol: TCP
@@ -137,14 +143,6 @@ objects:
           port: 8081
           protocol: TCP
           targetPort: 8081
-        - name: 8082-tcp
-          port: 8082
-          protocol: TCP
-          targetPort: 8082
-        - name: 8088-tcp
-          port: 8088
-          protocol: TCP
-          targetPort: 8088
         - name: 54327-tcp
           port: 54327
           protocol: TCP
@@ -161,7 +159,7 @@ objects:
       name: ${appName}-route
     spec:
       port:
-        targetPort: 443-tcp
+        targetPort: 8081-tcp
       to:
         kind: Service
         name: mule-ee-${appName}

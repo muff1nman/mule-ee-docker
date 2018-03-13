@@ -29,7 +29,7 @@ ADD     ./startMule.sh /app/mule/bin/
 ADD     ./wrapper.conf /app/mule/conf/
    
 ## Mule app port
-EXPOSE  443
+EXPOSE  8081
 
 ## Mule Cluster ports
 EXPOSE  5701
