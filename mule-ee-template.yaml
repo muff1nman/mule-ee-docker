@@ -49,6 +49,26 @@ objects:
                     secretKeyRef:
                       key: password
                       name: anypointplatform
+                - name: proxyHost
+                  valueFrom:
+                    secretKeyRef:
+                      key: proxyHost
+                      name: anypointplatform
+                - name: proxyPort
+                  valueFrom:
+                    secretKeyRef:
+                      key: proxyPort
+                      name: anypointplatform
+                - name: proxyUsername
+                  valueFrom:
+                    secretKeyRef:
+                      key: proxyUsername
+                      name: anypointplatform
+                - name: proxyPassword
+                  valueFrom:
+                    secretKeyRef:
+                      key: proxyPassword
+                      name: anypointplatform
                 - name: client_id
                   value: ${client_id}
                 - name: client_secret
