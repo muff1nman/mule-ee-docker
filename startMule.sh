@@ -23,6 +23,7 @@
 # initMemory	                    no	      value for -M-Dwrapper.java.initmemory. Default 512
 # maxMemory	                      no	      value for -M-Dwrapper.java.maxmemory. Default 512
 # startMuleOtherArguments	        no	      Other key value argument that will pass to runtime
+# debug                 	        no	      set to true to enable debug log on start up script
 
 set -e
 
@@ -35,39 +36,45 @@ if ! whoami &> /dev/null; then
   fi
 fi
 
+if [ "$debug" == "true" ]
+  then
+    echo "start script with variable.."
+    if [ "$orgId" != "" ]
+        then
+            echo "orgId: *******"
+    fi
+    echo "username: $username"
+    if [ "$password" != "" ]
+        then
+            echo "password: *******"
+    fi
+    echo "envName: $envName"
+    echo "anypointPlatformHost: $anypointPlatformHost"
+    echo "anypointPlatformPort: $anypointPlatformPort"
+    echo "registerTargetGroupName: $registerTargetGroupName"
+    echo "registerTargetGroupType: $registerTargetGroupType"
+    echo "client_id: $client_id"
+    if [ "$client_secret" != "" ]
+        then
+            echo "client_secret: *******"
+    fi
+    if [ "$key" != "" ]
+        then
+            echo "key: *******"
+    fi
+    echo "env - $env"
+    echo "initMemory: $initMemory"
+    echo "maxMemory: $maxMemory"
+    echo "proxyHost: $proxyHost"
+    echo "proxyPort: $proxyPort"
+    echo "proxyUsername: $proxyUsername"
+    if [ "$proxyPassword" != "" ]
+        then
+            echo "proxyPassword: *******"
+    fi
+    echo "startMuleOtherArguments: $startMuleOtherArguments"
 
-echo "start script with variable.."
-echo "orgId: $orgId"
-echo "username: $username"
-if [ "$password" != "" ]
-    then
-        echo "password: *******"
 fi
-echo "envName: $envName"
-echo "anypointPlatformHost: $anypointPlatformHost"
-echo "anypointPlatformPort: $anypointPlatformPort"
-echo "registerTargetGroupName: $registerTargetGroupName"
-echo "registerTargetGroupType: $registerTargetGroupType"
-echo "client_id: $client_id"
-if [ "$client_secret" != "" ]
-    then
-        echo "client_secret: *******"
-fi
-if [ "$key" != "" ]
-    then
-        echo "key: *******"
-fi
-echo "env - $env"
-echo "initMemory: $initMemory"
-echo "maxMemory: $maxMemory"
-echo "proxyHost: $proxyHost"
-echo "proxyPort: $proxyPort"
-echo "proxyUsername: $proxyUsername"
-if [ "$proxyPassword" != "" ]
-    then
-        echo "proxyPassword: *******"
-fi
-echo "startMuleOtherArguments: $startMuleOtherArguments"
 
 #Function to wait server to start up
 waitingServerStart()
@@ -184,16 +191,24 @@ if [[ "$orgId" != "" &&  "$username" != "" &&  "$password" != "" &&  "$envName" 
             if [[ "$proxyUsername" != "" &&  "$proxyPassword" != "" ]]
               then
                 proxyOption="-x http://$proxyHost:$proxyPort --proxy-user $proxyUsername:$proxyPassword"
+                muleRuntimeProxyArgument="-M-Danypoint.platform.proxy_host=$proxyHost -M-Danypoint.platform.proxy_port=$proxyPort -M-Danypoint.platform.proxy_username=$proxyUsername -M-Danypoint.platform.proxy_password=$proxyPassword -M-Dhttp.proxyHost=$proxyHost -M-Dhttp.proxyPort=$proxyPort -M-Dhttp.proxyUsername=$proxyUsername -M-Dhttp.proxyPassword=$proxyPassword"
               else
                 proxyOption="-x http://$proxyHost:$proxyPort"
+                muleRuntimeProxyArgument="-M-Danypoint.platform.proxy_host=$proxyHost -M-Danypoint.platform.proxy_port=$proxyPort -M-Dhttp.proxyHost=$proxyHost -M-Dhttp.proxyPort=$proxyPort"
             fi
         fi
-        echo "Proxy option is $proxyOption"
+        echo "muleRuntimeProxyArgument=$muleRuntimeProxyArgument"
         
         # Authenticate with user credentials (Note the APIs will NOT authorize for tokens received from the OAuth call. A user credentials is essential)
         echo "Getting access token from $accAPI/login..."
         accessToken=$(curl $proxyOption -s $accAPI/login -X POST -d "username=$username&password=$password" | /app/jq --raw-output .access_token)
-        echo "Access Token: $accessToken"
+        if [ "$debug" == "true" ]
+          then
+             if [ "$accessToken" != "" ]
+                  then
+                      echo "Access Token: *******"
+              fi
+        fi
     
         ### comment out below session as orgId has been provide as parameter ###
         # Pull org id from my profile info
@@ -247,11 +262,11 @@ fi
 # Check memory setting
 if [ "$initMemory" == "" ]
     then
-        initMemory=1024
+        initMemory=512
 fi
 if [ "$maxMemory" == "" ]
     then
-        maxMemory=1024
+        maxMemory=512
 fi
 echo "Starting Mule"
  
