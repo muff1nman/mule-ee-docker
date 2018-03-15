@@ -5,7 +5,7 @@
 ## FROM openjdk
 ###############################################################################
 
-FROM openjdk
+FROM hoecprvnex01.na.xom.com:5000/redhat-openjdk-18/openjdk18-openshift:latest
 LABEL maintainer="taneng_26@hotmail.com"
  
 ###############################################################################
