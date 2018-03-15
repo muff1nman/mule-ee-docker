@@ -21,7 +21,7 @@ ARG     muleHome=/app/mule-enterprise-standalone-$muleVersion
 WORKDIR  /app/
 #COPY    $muleDistribution /app/
 
-RUN curl -O https://s3.amazonaws.com/new-mule-artifacts/$muleDistribution $curlArgument && \
+RUN curl -k -O https://s3.amazonaws.com/new-mule-artifacts/$muleDistribution $curlArgument && \
         tar -xvzf /app/$muleDistribution && \
         ln -s $muleHome/ mule && \
         rm -f $muleDistribution
