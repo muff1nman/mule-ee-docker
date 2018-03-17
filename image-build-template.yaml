@@ -12,7 +12,7 @@ objects:
     metadata:
       name: ${imageName}
     spec:
-  - kind: Build
+  - kind: BuildConfig
     apiVersion: v1
     metadata:
       name: ${imageName}-image-build
@@ -29,6 +29,14 @@ objects:
         to:
           kind: ImageStreamTag
           name: ${imageName}:latest
+      triggers:
+        - type: ConfigChange
+        - generic:
+           secret: ${genericTriggerSecret}
+          type: Generic
+        - github:
+           secret: ${githubTriggerSecret}
+          type: GitHub
 parameters:
   - name: imageName
     displayName: Image Name
@@ -40,3 +48,14 @@ parameters:
     description: "Git URI"
     value: "https://github.com/tanetg/mule-ee-docker"
     required: true
+  - name: githubTriggerSecret
+    displayName: Github Trigger Secret
+    description: "Github Trigger Secret"
+    from: "[a-zA-Z0-9]{8}"
+    generate: expression
+  - name: genericTriggerSecret
+    displayName: Generic Trigger Secret
+    description: "Generic Trigger Secret"
+    from: "[a-zA-Z0-9]{8}"
+    generate: expression
+  
