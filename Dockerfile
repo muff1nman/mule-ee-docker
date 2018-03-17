@@ -19,10 +19,9 @@ ARG     muleHome=/app/mule-enterprise-standalone-$muleVersion
  
 ## Install Mule EE - these are the paths inside the Docker.
 WORKDIR  /app/
-#COPY    $muleDistribution /app/
 
-RUN curl -k -O https://s3.amazonaws.com/new-mule-artifacts/$muleDistribution $curlArgument && \
-        tar -xvzf /app/$muleDistribution && \
+RUN curl -k -O https://s3.amazonaws.com/new-mule-artifacts/$muleDistribution && \
+        tar -xvzf $muleHome && \
         ln -s $muleHome/ mule && \
         rm -f $muleDistribution
 
