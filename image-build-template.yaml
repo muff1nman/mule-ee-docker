@@ -20,7 +20,7 @@ objects:
       source:
         git:
           ref: master
-          uri: 'https://github.com/tanetg/mule-ee-docker'
+          uri: ${gitURI}
         type: Git
       strategy:
         type: Docker
