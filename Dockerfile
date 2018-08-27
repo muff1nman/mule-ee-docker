@@ -27,8 +27,9 @@ RUN tar -xvzf /app/$muleDistribution && \
 ADD     ./jq /app/jq
 ADD     ./startMule.sh /app/mule/bin/
 ADD     ./wrapper.conf /app/mule/conf/
+ADD     ./hellodocker-1.0.0-SNAPSHOT.zip /app/mule/apps
    
-## Mule app port
+## Mule  app port
 EXPOSE  8081
 
 ## Mule Cluster ports
