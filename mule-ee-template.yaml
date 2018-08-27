@@ -7,17 +7,27 @@ metadata:
     iconClass: "icon-openjdk"
     tags: "mule-ee"
 objects:
+  - kind: Secret
+    apiVersion: v1
+    stringData:
+      client_id: ${client_id}
+      client_secret: ${client_secret}
+      key: ${key}
+      orgId: ${orgId}
+    metadata:
+      name: ${appName}
+    type: Opaque
   - kind: DeploymentConfig
     apiVersion: v1
     metadata:
-      name: mule-ee-${appName}
+      name: ${appName}
       labels:
-        app: mule-ee-${appName}
+        app: ${appName}
     spec:
       replicas: ${numPod}
       selector:
-        app: mule-ee-${appName}
-        deploymentconfig: mule-ee-${appName}
+        app: ${appName}
+        deploymentconfig: ${appName}
       strategy:
         activeDeadlineSeconds: 21600
         resources: {}
@@ -34,8 +44,8 @@ objects:
             openshift.io/generated-by: OpenShiftWebConsole
           creationTimestamp: null
           labels:
-            app: mule-ee-${appName}
-            deploymentconfig: mule-ee-${appName}
+            app: ${appName}
+            deploymentconfig: ${appName}
         spec:
           containers:
             - env:
@@ -70,9 +80,15 @@ objects:
                       key: proxyPassword
                       name: anypointplatform
                 - name: client_id
-                  value: ${client_id}
+                  valueFrom:
+                    secretKeyRef:
+                      key: client_id
+                      name: ${appName}
                 - name: client_secret
-                  value: ${client_secret}
+                  valueFrom:
+                    secretKeyRef:
+                      key: client_secret
+                      name: ${appName}
                 - name: env
                   value: ${env}
                 - name: envName
@@ -80,11 +96,17 @@ objects:
                 - name: initMemory
                   value: ${initMemory}
                 - name: key
-                  value: ${key}
+                  valueFrom:
+                    secretKeyRef:
+                      key: key
+                      name: ${appName}
                 - name: maxMemory
                   value: ${maxMemory}
                 - name: orgId
-                  value: ${orgId}
+                  valueFrom:
+                    secretKeyRef:
+                      key: orgId
+                      name: ${appName}
                 - name: registerTargetGroupName
                   value: ${registerTargetGroupName}
                 - name: registerTargetGroupType
@@ -100,7 +122,7 @@ objects:
                 tcpSocket:
                   port: 8081
                 timeoutSeconds: 1
-              name: mule-ee-${appName}
+              name: ${appName}
               ports:
                 - containerPort: 5701
                   protocol: TCP
@@ -132,7 +154,7 @@ objects:
   - kind: Service
     apiVersion: v1
     metadata:
-      name: mule-ee-${appName}
+      name: ${appName}
     spec:
       ports:
         - name: 5701-tcp
@@ -148,21 +170,21 @@ objects:
           protocol: TCP
           targetPort: 54327
       selector:
-        deploymentconfig: mule-ee-${appName}
+        deploymentconfig: ${appName}
       sessionAffinity: None
       type: ClusterIP           
   - kind: Route
     apiVersion: v1
     metadata:
       labels:
-        app: mule-ee-${appName}
-      name: ${appName}-route
+        app: ${appName}
+      name: ${appName}
     spec:
       port:
         targetPort: 8081-tcp
       to:
         kind: Service
-        name: mule-ee-${appName}
+        name: ${appName}
         weight: 100
       wildcardPolicy: None
 parameters:
@@ -215,11 +237,11 @@ parameters:
     value: c5Fa13E33E4C4eDd847CB1eE184180E2
     required: false
   - name: key
-    displayName: Encryption Key
+    displayName: Encryption Key (key variable in runtime)
     description: "value for -M-Dkey"
     required: false
   - name: env
-    displayName: Encryption Key
+    displayName: Environment (env variable in runtime)
     description: "value for -M-Denv"
     value: dev
     required: true
