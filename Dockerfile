@@ -1,11 +1,10 @@
 ###############################################################################
 ## Dockerizing Mule EE
 ## Version:  1.0
-## Based on:  OpenJDK from Docker registry
-## FROM openjdk
+## Based on:  OpenJDK from Red Hat registry
 ###############################################################################
 
-FROM openjdk
+FROM registry.access.redhat.com/redhat-openjdk-18/openjdk18-openshift:latest
 LABEL maintainer="taneng_26@hotmail.com"
  
 ###############################################################################
@@ -18,6 +17,8 @@ ARG     muleHome=/app/mule-enterprise-standalone-$muleVersion
 ## MuleEE installation:
  
 ## Install Mule EE - these are the paths inside the Docker.
+USER root
+
 WORKDIR  /app/
 
 RUN curl -k -O https://s3.amazonaws.com/new-mule-artifacts/$muleDistribution && \
@@ -44,7 +45,6 @@ RUN mkdir /app/mule/.mule && \
         chmod -R 777 /app/mule/bin && \
 	chmod -R 777 /app/mule/conf && \
         chmod -R 777 /app/mule/logs && \
-	chmod -R g=u /var /opt && \
 	chmod g=u /etc/passwd
 
 
