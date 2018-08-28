@@ -1,0 +1,25 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: mule-ee
+  name: mule-ee
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mule-ee
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: mule-ee
+    spec:
+      containers:
+      - image: mule-ee
+        name: mule-ee
+        resources: {}
+status: {}
