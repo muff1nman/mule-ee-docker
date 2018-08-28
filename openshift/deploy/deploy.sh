@@ -26,3 +26,5 @@ image=$(oc get imagestreamtag mule-ee:latest -o jsonpath='{ .image.dockerImageRe
 cat $dir/deploy.yml | \
   oc set image -f - mule-ee=${image} --local -o yaml | \
   oc apply -f -
+
+oc apply -f $dir/service.yml
