@@ -28,3 +28,4 @@ cat $dir/deploy.yml | \
   oc apply -f -
 
 oc apply -f $dir/service.yml
+oc apply -f $dir/route.yml
