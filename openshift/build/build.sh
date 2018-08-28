@@ -22,4 +22,9 @@ then
 fi
 
 oc apply -f $dir/build.yml
-oc start-build mule-ee --from-dir=. --wait --follow
+
+pushd $dir/../../hellodocker/
+zip -r ../hellodocker-1.0.0-SNAPSHOT.zip *
+popd
+
+oc start-build mule-ee --from-dir=$dir/../../ --wait --follow
