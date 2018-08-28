@@ -30,6 +30,8 @@ ADD     ./jq /app/jq
 ADD     ./startMule.sh /app/mule/bin/
 ADD     ./wrapper.conf /app/mule/conf/
 ADD     ./hellodocker-1.0.0-SNAPSHOT.zip /app/mule/apps
+
+RUN sed -i 's/Async//g' /app/mule-enterprise-standalone-3.9.0/conf/log4j2.xml
    
 ## Mule  app port
 EXPOSE  8081
