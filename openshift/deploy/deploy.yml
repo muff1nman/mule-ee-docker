@@ -21,5 +21,7 @@ spec:
       containers:
       - image: mule-ee
         name: mule-ee
-        resources: {}
+        resources:
+          limits:
+            memory: 512Mi
 status: {}
