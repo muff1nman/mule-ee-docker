@@ -22,4 +22,4 @@ then
 fi
 
 oc apply -f $dir/build.yml
-oc start-build mule-ee
+oc start-build mule-ee --from-dir=. --wait --follow
