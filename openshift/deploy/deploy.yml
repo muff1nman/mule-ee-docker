@@ -21,6 +21,8 @@ spec:
       containers:
       - image: mule-ee
         name: mule-ee
+        tty: true
+        stdin: true
         resources:
           requests:
             memory: 256Mi
